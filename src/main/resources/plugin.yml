@@ -1,0 +1,5 @@
+name: DeathColor
+version: '${version}'
+main: net.kunmc.deathcolor.DeathColor
+api-version: 1.16
+authors: [ Kamesuta ]
