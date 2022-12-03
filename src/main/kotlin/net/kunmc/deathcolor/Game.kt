@@ -31,7 +31,7 @@ import org.bukkit.inventory.ItemStack
  */
 class Game : Listener {
     /** プレイ中かどうか */
-    private var state: GameState? = null
+    var state: GameState? = null
 
     /** ボスバーのキー */
     private val bossBarKey = NamespacedKey(DeathColor.instance, "death_color")
@@ -373,14 +373,5 @@ class Game : Listener {
 
         // メッセージを表示
         event.player.sendMessage(Component.text("$CHAT_PREFIX 死んでしまったため、${state.timeRespawnCooldown.minuteSecondString}間の無敵時間が与えられます"))
-    }
-
-    /** 次の色を取得 */
-    fun setNextColor(color: String) {
-        // プレイ中でないなら無視
-        val state = state ?: return
-
-        // 次の色を設定
-        state.nextColor = EnumColor.values().find { it.colorName == color }
     }
 }

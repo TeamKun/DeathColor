@@ -1,6 +1,7 @@
 package net.kunmc.deathcolor
 
 import org.bukkit.Bukkit
+import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.configuration.file.YamlConfiguration
@@ -90,10 +91,20 @@ class DeathColor : JavaPlugin() {
             // 色を設定
             "setNextColor" -> {
                 val color = args.getOrNull(1)
-                if (color != null) {
-                    game.setNextColor(color)
-                    sender.sendMessage("$CHAT_PREFIX 次の色を${color}に設定しました")
+                    ?: return true.also {
+                        sender.sendMessage("$CHAT_PREFIX 色を指定してください")
+                        sender.sendMessage("$CHAT_PREFIX /deathcolor setNextColor <色>")
+                    }
+
+                // プレイ中でないなら無視
+                val state = game.state ?: return true.also {
+                    sender.sendMessage("$CHAT_PREFIX プレイ中ではありません")
                 }
+
+                // 次の色を設定
+                state.nextColor = EnumColor.values().find { it.colorName == color }
+                sender.sendMessage("$CHAT_PREFIX 次の色を${state.nextColor?.colorText ?: "ランダム"}${ChatColor.RESET}に設定しました")
+
                 return true
             }
 
