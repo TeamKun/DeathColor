@@ -42,8 +42,8 @@ MUSHROOM_COW: red
 SNOWMAN: white
 OCELOT: yellow
 IRON_GOLEM: light_gray
-HORSE: brown
-RABBIT: black
+HORSE: 'null'
+RABBIT: 'null'
 POLAR_BEAR: white
 LLAMA: yellow
 PARROT: red
@@ -56,7 +56,7 @@ PUFFERFISH: orange
 TROPICAL_FISH: orange
 DROWNED: gray
 DOLPHIN: light_blue
-CAT: white
+CAT: 'null'
 PANDA: black
 PILLAGER: magenta
 RAVAGER: gray
