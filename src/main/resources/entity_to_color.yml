@@ -24,7 +24,7 @@ ENDERMAN: black
 CAVE_SPIDER: black
 SILVERFISH: light_gray
 BLAZE: yellow
-MAGMA_CUBE: orange
+MAGMA_CUBE: red
 ENDER_DRAGON: black
 WITHER: black
 BAT: brown
@@ -45,7 +45,7 @@ IRON_GOLEM: light_gray
 HORSE: 'null'
 RABBIT: 'null'
 POLAR_BEAR: white
-LLAMA: yellow
+LLAMA: white
 PARROT: red
 VILLAGER: brown
 TURTLE: green
@@ -54,7 +54,7 @@ COD: brown
 SALMON: red
 PUFFERFISH: orange
 TROPICAL_FISH: orange
-DROWNED: gray
+DROWNED: cyan
 DOLPHIN: light_blue
 CAT: 'null'
 PANDA: black
@@ -84,3 +84,6 @@ MINECART: light_gray
 MINECART_MOB_SPAWNER: black
 ENDER_CRYSTAL: magenta
 TRIDENT: light_gray
+DRAGON_FIREBALL: purple
+BOAT: brown
+LLAMA_SPIT: white
