@@ -1,0 +1,7 @@
+game:
+  cooldownTime: 5
+  intervalTime: 15
+  remainingTimeCandidates:
+    - 60
+    - 180
+    - 300
