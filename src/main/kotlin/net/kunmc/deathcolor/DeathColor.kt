@@ -6,6 +6,7 @@ class DeathColor : JavaPlugin() {
     override fun onEnable() {
         // Plugin startup logic
         ColorMapGenerator.generateBlockToColor()
+        ColorMapGenerator.generateEntityToColor()
     }
 
     override fun onDisable() {
