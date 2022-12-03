@@ -8,7 +8,6 @@
 
 - `/deathcolor start` でゲームを開始します。
 - `/deathcolor stop` でゲームを終了します。
-- `/deathcolor setNextColor` で次の色を設定します。
 
 ## 仕様
 
@@ -47,6 +46,8 @@
     - 色付きシュルカーの色
 - ブロックの縁に乗っても死にます  
 - ブロック色の抽選はランダムですが、16ターンで必ず
+- 次の色を強制的に設定することができます
+    - `/deathcolor setNextColor` で次の色を設定します。
 
 ## コンフィグ
 - `cooldownTime`: 開始前の待機秒数
