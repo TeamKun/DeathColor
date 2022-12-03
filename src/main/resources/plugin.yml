@@ -3,3 +3,15 @@ version: '${version}'
 main: net.kunmc.deathcolor.DeathColor
 api-version: 1.16
 authors: [ Kamesuta ]
+
+commands:
+  deathcolor:
+    description: DeathColorコマンド
+    permission: deathcolor.command
+    usage: |-
+      /deathcolor <on|off>
+
+permissions:
+  deathcolor.command:
+    description: DeathColorコマンドの実行権限
+    default: op
