@@ -55,7 +55,15 @@ class DeathColor : JavaPlugin() {
         args: Array<out String>
     ): MutableList<String> {
         return when (args.size) {
-            1 -> mutableListOf("start", "stop")
+            1 -> mutableListOf("start", "stop", "setNextColor")
+            2 -> {
+                if (args[0] == "setNextColor") {
+                    EnumColor.values().map { it.colorName }.toMutableList()
+                } else {
+                    mutableListOf()
+                }
+            }
+
             else -> mutableListOf()
         }
     }
@@ -76,6 +84,16 @@ class DeathColor : JavaPlugin() {
             "stop" -> {
                 game.stop()
                 Bukkit.broadcastMessage("$CHAT_PREFIX ゲームを終了しました")
+                return true
+            }
+
+            // 色を設定
+            "setNextColor" -> {
+                val color = args.getOrNull(1)
+                if (color != null) {
+                    game.setNextColor(color)
+                    sender.sendMessage("$CHAT_PREFIX 次の色を${color}に設定しました")
+                }
                 return true
             }
 

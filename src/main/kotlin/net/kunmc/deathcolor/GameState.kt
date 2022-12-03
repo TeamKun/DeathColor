@@ -30,6 +30,9 @@ class GameState(private val bossBar: BossBar) {
     private val remainingTimeCandidate: List<Int> =
         DeathColor.instance.config.getIntegerList("game.remainingTimeCandidates")
 
+    /** 次の色 */
+    var nextColor: EnumColor? = null
+
     /** ゲームのフェーズ */
     enum class Phase {
         /** 試合前カウントダウン */
@@ -52,9 +55,10 @@ class GameState(private val bossBar: BossBar) {
 
     /** ランダムな色にセットする */
     private fun setRandomDeathColor() {
-        deathColor = EnumColor.values().random()
+        deathColor = nextColor
+            ?: EnumColor.values().random()
+        nextColor = null
     }
-
 
     /** ランダムな残り時間にセット */
     private fun setRandomCountDown() {
@@ -104,7 +108,7 @@ class GameState(private val bossBar: BossBar) {
             )
         }
         Bukkit.broadcastMessage("$CHAT_PREFIX 次の触れたら死ぬ色は「 ${deathColor.chatColor}${ChatColor.BOLD}${deathColor.langName}${ChatColor.WHITE} 」です")
-        Bukkit.broadcastMessage("$CHAT_PREFIX  ${ChatColor.ITALIC}${timeCooldown.minuteSecondString}後 に開始します")
+        Bukkit.broadcastMessage("$CHAT_PREFIX  ${timeCooldown.minuteSecondString}後 に開始します")
     }
 
     /** カウントダウンタイトルを表示 */
@@ -134,14 +138,14 @@ class GameState(private val bossBar: BossBar) {
         Bukkit.broadcastMessage("$CHAT_PREFIX スタート")
         Bukkit.broadcastMessage("$CHAT_PREFIX  触れたら死ぬ色は「 ${deathColor.chatColor}${ChatColor.BOLD}${deathColor.langName}${ChatColor.WHITE} 」です")
         Bukkit.broadcastMessage(
-            "$CHAT_PREFIX  制限時間は ${ChatColor.YELLOW}${ChatColor.ITALIC}${timeGameRemaining.minuteSecondString}${ChatColor.RESET} です"
+            "$CHAT_PREFIX  制限時間は ${ChatColor.YELLOW}${timeGameRemaining.minuteSecondString}${ChatColor.RESET} です"
         )
     }
 
     /** インターバルチャットを表示 */
     private fun showIntervalChat() {
         Bukkit.broadcastMessage(
-            "$CHAT_PREFIX ${ChatColor.ITALIC}フェーズクリア！ " +
+            "$CHAT_PREFIX フェーズクリア！ " +
                     "これより ${timeInterval.minuteSecondString} の休憩時間を開始します"
         )
     }

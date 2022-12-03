@@ -42,6 +42,12 @@ fun Entity.toEnumColor(): EnumColor? {
             return EnumColor.values().find { it.name == color?.name }
         }
 
+        // 色付きシュルカー
+        EntityType.SHULKER -> {
+            this as Shulker
+            return EnumColor.values().find { it.name == color?.name }
+        }
+
         else -> type
     }
 

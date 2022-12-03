@@ -16,9 +16,11 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
 import org.bukkit.event.entity.EntityDamageByEntityEvent
+import org.bukkit.event.entity.EntitySpawnEvent
 import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerRespawnEvent
+import org.bukkit.inventory.ItemStack
 
 /**
  * ゲーム進行に関する処理
@@ -159,6 +161,20 @@ class Game : Listener {
                 continue
             }
 
+            // アーマーの色を取得
+            for (armor: ItemStack? in player.inventory.armorContents) {
+                if (armor != null) {
+                    val armorColor = armor.type.toEnumColor()
+                    if (armorColor == state.deathColor) {
+                        // アーマーが死ぬ色だったら死ぬ
+                        player.damage(state.damageAmount) {
+                            player.deathMessage(state.deathColor, armor.type.text, "を身に着けてしまった")
+                        }
+                        continue
+                    }
+                }
+            }
+
             val nearbyEntity = nearbyEntities.find { it.toEnumColor() == state.deathColor }
             if (nearbyEntity != null) {
                 // 近くに死ぬ色のエンティティがいたら死ぬ
@@ -171,6 +187,7 @@ class Game : Listener {
         state.deathColor
     }
 
+    /** ブロックを触ったとき/殴ったとき */
     @EventHandler
     fun onPlayerInteract(event: PlayerInteractEvent) {
         // プレイ中でないなら無視
@@ -198,6 +215,7 @@ class Game : Listener {
         }
     }
 
+    /** エンティティを殴ったとき */
     @EventHandler
     fun onPlayerAttackEntity(event: EntityDamageByEntityEvent) {
         // プレイ中でないなら無視
@@ -220,6 +238,19 @@ class Game : Listener {
         }
     }
 
+    /** Mobを出したときスポーンエッグの名前を除去 */
+    @EventHandler
+    fun onSpawnEggUsed(event: EntitySpawnEvent) {
+        val name = event.entity.customName()
+            ?: return
+
+        // 名前があったら削除
+        if (name.children().last() == Component.text(" ) ")) {
+            event.entity.customName(null)
+        }
+    }
+
+    /** 死亡時メッセージ */
     private fun Player.deathMessage(
         color: EnumColor,
         text: Component,
@@ -270,6 +301,7 @@ class Game : Listener {
         deathMessages.remove(event.entity)
     }
 
+    /** リスポーンしたとき */
     @EventHandler
     fun onRespawn(event: PlayerRespawnEvent) {
         // プレイ中でないなら無視
@@ -281,5 +313,14 @@ class Game : Listener {
 
         // メッセージを表示
         event.player.sendMessage(Component.text("$CHAT_PREFIX 死んでしまったため、${state.timeRespawnCooldown.minuteSecondString}間の無敵時間が与えられます"))
+    }
+
+    /** 次の色を取得 */
+    fun setNextColor(color: String) {
+        // プレイ中でないなら無視
+        val state = state ?: return
+
+        // 次の色を設定
+        state.nextColor = EnumColor.values().find { it.colorName == color }
     }
 }
