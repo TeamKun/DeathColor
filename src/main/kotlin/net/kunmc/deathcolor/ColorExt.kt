@@ -1,8 +1,12 @@
 package net.kunmc.deathcolor
 
 import net.kyori.adventure.text.Component
+import org.bukkit.ChatColor
 import org.bukkit.Material
 import org.bukkit.entity.*
+
+/** チャットのプレフィックス */
+val CHAT_PREFIX = "${ChatColor.GRAY}◆${ChatColor.RESET}"
 
 /** アイテムの色を取得する */
 fun Material.toEnumColor(): EnumColor? {
@@ -45,3 +49,19 @@ val Material.text get() = Component.translatable(translationKey)
 
 /** エンティティを文字列にする */
 val Entity.text get() = Component.translatable("entity.minecraft.${type.key.key}")
+
+/** 分,秒の文字列を返す */
+val Int.minuteSecondString: String
+    get() {
+        val minute = this / 60
+        val second = this % 60
+        // 1分未満の場合は秒のみ表示、秒数が0の場合は分のみ表示
+        return if (minute == 0) {
+            "${second}秒"
+        } else if (second == 0) {
+            "${minute}分"
+        } else {
+            "${minute}分${second}秒"
+        }
+    }
+

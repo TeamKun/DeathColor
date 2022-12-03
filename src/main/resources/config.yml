@@ -3,6 +3,8 @@ game:
   cooldownTime: 5
   # 終了後の休憩時間の秒数
   intervalTime: 15
+  # リスポーン後の無敵時間
+  respawnCooldownTime: 10
   # 死の色に触ったときのダメージ量
   damage: 100.0
   # プレイ中の残り時間の候補

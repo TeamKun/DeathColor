@@ -18,14 +18,12 @@ import org.bukkit.event.block.Action
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.player.PlayerInteractEvent
+import org.bukkit.event.player.PlayerRespawnEvent
 
 /**
  * ゲーム進行に関する処理
  */
 class Game : Listener {
-    /** 死の色に触ったときのダメージ量 */
-    private val damageAmount = DeathColor.instance.config.getDouble("game.damage")
-
     /** プレイ中かどうか */
     private var state: GameState? = null
 
@@ -43,6 +41,9 @@ class Game : Listener {
 
     /** 死亡時メッセージ */
     private val deathMessages = mutableMapOf<Player, Component>()
+
+    /** 死亡時メッセージ */
+    private val respawnTicks = mutableMapOf<Player, Int>()
 
     /** ゲーム開始 */
     fun start() {
@@ -132,7 +133,7 @@ class Game : Listener {
 
             if (footColor == state.deathColor) {
                 // 足元が死ぬ色だったら死ぬ
-                player.damage(damageAmount) {
+                player.damage(state.damageAmount) {
                     player.deathMessage(state.deathColor, footBlock.type.text, "を踏んでしまった")
                 }
                 continue
@@ -142,7 +143,7 @@ class Game : Listener {
             val mainHandColor = mainHandItem.toEnumColor()
             if (mainHandColor == state.deathColor) {
                 // メインハンドが死ぬ色だったら死ぬ
-                player.damage(damageAmount) {
+                player.damage(state.damageAmount) {
                     player.deathMessage(state.deathColor, mainHandItem.text, "を右手に持ってしまった")
                 }
                 continue
@@ -152,7 +153,7 @@ class Game : Listener {
             val offHandColor = offHandItem.toEnumColor()
             if (offHandColor == state.deathColor) {
                 // オフハンドが死ぬ色だったら死ぬ
-                player.damage(damageAmount) {
+                player.damage(state.damageAmount) {
                     player.deathMessage(state.deathColor, offHandItem.text, "を左手に持ってしまった")
                 }
                 continue
@@ -161,7 +162,7 @@ class Game : Listener {
             val nearbyEntity = nearbyEntities.find { it.toEnumColor() == state.deathColor }
             if (nearbyEntity != null) {
                 // 近くに死ぬ色のエンティティがいたら死ぬ
-                player.damage(damageAmount) {
+                player.damage(state.damageAmount) {
                     player.deathMessage(state.deathColor, nearbyEntity.text, "にぶつかってしまった")
                 }
             }
@@ -183,7 +184,7 @@ class Game : Listener {
         // ブロックの色が死ぬ色だったら
         if (clickedColor == state.deathColor) {
             // 死ぬ
-            event.player.damage(damageAmount) {
+            event.player.damage(state.damageAmount) {
                 event.player.deathMessage(
                     state.deathColor,
                     clickedBlock.text,
@@ -213,7 +214,7 @@ class Game : Listener {
         // エンティティの色が死ぬ色だったら
         if (entityColor == state.deathColor) {
             // 死ぬ
-            player.damage(damageAmount) {
+            player.damage(state.damageAmount) {
                 player.deathMessage(state.deathColor, entity.text, "を殴ってしまった")
             }
         }
@@ -240,6 +241,12 @@ class Game : Listener {
         // 死んでいたらダメージを与えない
         if (isDead) return
 
+        // 無敵時間中ならダメージを与えない
+        respawnTicks[this]?.let {
+            val state = state ?: return@let
+            if (Bukkit.getCurrentTick() - it < state.timeRespawnCooldown * 20) return
+        }
+
         // 死んだらメッセージを保存
         if (health - damage <= 0) {
             // 死亡時メッセージを保存
@@ -261,5 +268,18 @@ class Game : Listener {
 
         // 死亡時メッセージを削除
         deathMessages.remove(event.entity)
+    }
+
+    @EventHandler
+    fun onRespawn(event: PlayerRespawnEvent) {
+        // プレイ中でないなら無視
+        val state = state ?: return
+        if (state.phase != GameState.Phase.PLAYING) return
+
+        // 無敵時間を設定
+        respawnTicks[event.player] = Bukkit.getCurrentTick()
+
+        // メッセージを表示
+        event.player.sendMessage(Component.text("$CHAT_PREFIX 死んでしまったため、${state.timeRespawnCooldown.minuteSecondString}間の無敵時間が与えられます"))
     }
 }

@@ -68,14 +68,14 @@ class DeathColor : JavaPlugin() {
             // スタート
             "start" -> {
                 game.start()
-                Bukkit.broadcastMessage("${GameState.CHAT_PREFIX} ゲームを開始しました")
+                Bukkit.broadcastMessage("$CHAT_PREFIX ゲームを開始しました")
                 return true
             }
 
             // ストップ
             "stop" -> {
                 game.stop()
-                Bukkit.broadcastMessage("${GameState.CHAT_PREFIX} ゲームを終了しました")
+                Bukkit.broadcastMessage("$CHAT_PREFIX ゲームを終了しました")
                 return true
             }
 

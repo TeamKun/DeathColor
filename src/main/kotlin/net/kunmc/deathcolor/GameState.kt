@@ -20,6 +20,12 @@ class GameState(private val bossBar: BossBar) {
     /** インターバルタイム */
     private val timeInterval = DeathColor.instance.config.getInt("game.intervalTime")
 
+    /** 死の色に触ったときのダメージ量 */
+    val timeRespawnCooldown = DeathColor.instance.config.getInt("game.respawnCooldownTime")
+
+    /** 死の色に触ったときのダメージ量 */
+    val damageAmount = DeathColor.instance.config.getDouble("game.damage")
+
     /** 残り時間候補 */
     private val remainingTimeCandidate: List<Int> =
         DeathColor.instance.config.getIntegerList("game.remainingTimeCandidates")
@@ -69,7 +75,7 @@ class GameState(private val bossBar: BossBar) {
             Phase.COOLDOWN -> {
                 bossBar.color = BarColor.BLUE
                 bossBar.progress = (countDown.toDouble() / timeCooldown).coerceIn(0.0..1.0)
-                bossBar.setTitle("${ChatColor.BOLD}ゲーム開始まで${ChatColor.YELLOW} ${getMinuteSecondString(countDown)}")
+                bossBar.setTitle("${ChatColor.BOLD}ゲーム開始まで${ChatColor.YELLOW} ${countDown.minuteSecondString}")
             }
 
             Phase.PLAYING -> {
@@ -98,7 +104,7 @@ class GameState(private val bossBar: BossBar) {
             )
         }
         Bukkit.broadcastMessage("$CHAT_PREFIX 次の触れたら死ぬ色は「 ${deathColor.chatColor}${ChatColor.BOLD}${deathColor.langName}${ChatColor.WHITE} 」です")
-        Bukkit.broadcastMessage("$CHAT_PREFIX  ${ChatColor.ITALIC}${getMinuteSecondString(timeCooldown)}後 に開始します")
+        Bukkit.broadcastMessage("$CHAT_PREFIX  ${ChatColor.ITALIC}${timeCooldown.minuteSecondString}後 に開始します")
     }
 
     /** カウントダウンタイトルを表示 */
@@ -128,33 +134,15 @@ class GameState(private val bossBar: BossBar) {
         Bukkit.broadcastMessage("$CHAT_PREFIX スタート")
         Bukkit.broadcastMessage("$CHAT_PREFIX  触れたら死ぬ色は「 ${deathColor.chatColor}${ChatColor.BOLD}${deathColor.langName}${ChatColor.WHITE} 」です")
         Bukkit.broadcastMessage(
-            "$CHAT_PREFIX  制限時間は ${ChatColor.YELLOW}${ChatColor.ITALIC}${
-                getMinuteSecondString(
-                    timeGameRemaining
-                )
-            }${ChatColor.RESET} です"
+            "$CHAT_PREFIX  制限時間は ${ChatColor.YELLOW}${ChatColor.ITALIC}${timeGameRemaining.minuteSecondString}${ChatColor.RESET} です"
         )
-    }
-
-    /** 分,秒の文字列を返す */
-    private fun getMinuteSecondString(time: Int): String {
-        val minute = time / 60
-        val second = time % 60
-        // 1分未満の場合は秒のみ表示、秒数が0の場合は分のみ表示
-        return if (minute == 0) {
-            "${second}秒"
-        } else if (second == 0) {
-            "${minute}分"
-        } else {
-            "${minute}分${second}秒"
-        }
     }
 
     /** インターバルチャットを表示 */
     private fun showIntervalChat() {
         Bukkit.broadcastMessage(
             "$CHAT_PREFIX ${ChatColor.ITALIC}フェーズクリア！ " +
-                    "これより ${getMinuteSecondString(timeInterval)} の休憩時間を開始します"
+                    "これより ${timeInterval.minuteSecondString} の休憩時間を開始します"
         )
     }
 
@@ -228,9 +216,4 @@ class GameState(private val bossBar: BossBar) {
             }
         }
     }.iterator()
-
-    companion object {
-        /** チャットのプレフィックス */
-        val CHAT_PREFIX = "${ChatColor.GRAY}◆${ChatColor.RESET}"
-    }
 }
