@@ -52,11 +52,22 @@ class GameState(private val bossBar: BossBar) {
     var deathColor: EnumColor = EnumColor.WHITE
         private set
 
+    /** ランダムの候補 */
+    private val randomCandidate = mutableListOf<EnumColor>()
 
     /** ランダムな色にセットする */
     private fun setRandomDeathColor() {
+        // ランダムの候補がなくなったら再生成
+        if (randomCandidate.isEmpty()) {
+            randomCandidate.addAll(EnumColor.values().toList())
+        }
+
+        // ランダムで抽選
         deathColor = nextColor
-            ?: EnumColor.values().random()
+            ?: randomCandidate.random()
+        // 候補から削除
+        randomCandidate.remove(deathColor)
+        // 次の色を解除
         nextColor = null
     }
 

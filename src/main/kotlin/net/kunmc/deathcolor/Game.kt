@@ -6,7 +6,10 @@ import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Bukkit
+import org.bukkit.Location
 import org.bukkit.NamespacedKey
+import org.bukkit.block.Block
+import org.bukkit.block.BlockFace
 import org.bukkit.boss.BarColor
 import org.bukkit.boss.BarStyle
 import org.bukkit.boss.KeyedBossBar
@@ -21,6 +24,7 @@ import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerRespawnEvent
 import org.bukkit.inventory.ItemStack
+
 
 /**
  * ゲーム進行に関する処理
@@ -101,13 +105,14 @@ class Game : Listener {
 
         for (player in Bukkit.getOnlinePlayers()) {
             // 近くのエンティティを取得
-            val nearbyEntities = player.world.getNearbyEntities(player.boundingBox) { entity ->
-                entity.type != EntityType.PLAYER
-            }
+            val nearbyEntities =
+                player.world.getNearbyEntities(player.boundingBox.clone().expand(BlockFace.DOWN, 0.1)) { entity ->
+                    entity.type != EntityType.PLAYER
+                }
 
             // 足元のブロックの色を取得
-            val footBlock = player.location.clone().add(0.0, -0.3, 0.0).block
-            val footColor = footBlock.type.toEnumColor()
+            val footCenterBlock = player.location.clone().add(0.0, -0.3, 0.0).block
+            val footCenterColor = footCenterBlock.type.toEnumColor()
 
             // 目線のブロック/エンティティの色を取得
             val eyeColor = player.getTargetEntity(5, true)?.toEnumColor()
@@ -118,7 +123,7 @@ class Game : Listener {
                 Component.text("目線: ")
                     .append(Component.text(eyeColor.colorText))
                     .append(Component.text("  足元: "))
-                    .append(Component.text(footColor.colorText))
+                    .append(Component.text(footCenterColor.colorText))
                     .let { component ->
                         val nearby = nearbyEntities.firstNotNullOfOrNull { it.toEnumColor() }
                         if (nearby != null) {
@@ -133,12 +138,30 @@ class Game : Listener {
             // プレイ中でないなら無視
             if (state.phase != GameState.Phase.PLAYING) continue
 
-            if (footColor == state.deathColor) {
-                // 足元が死ぬ色だったら死ぬ
-                player.damage(state.damageAmount) {
-                    player.deathMessage(state.deathColor, footBlock.type.text, "を踏んでしまった")
+            // 足元のブロックを取得
+            val blocksBelow = player.getBlocksBelow()
+            for (footBlock in blocksBelow) {
+                val footColor = footBlock.type.toEnumColor()
+                if (footColor == state.deathColor) {
+                    // 足元が死ぬ色だったら死ぬ
+                    player.damage(state.damageAmount) {
+                        player.deathMessage(state.deathColor, footBlock.type.text, "を踏んでしまった")
+                    }
+                    continue
                 }
-                continue
+            }
+
+            // 膝のブロックを取得
+            for (footBlock in blocksBelow) {
+                val legBlock = footBlock.getRelative(BlockFace.UP)
+                val legColor = legBlock.type.toEnumColor()
+                if (legColor == state.deathColor) {
+                    // 膝が死ぬ色だったら死ぬ
+                    player.damage(state.damageAmount) {
+                        player.deathMessage(state.deathColor, legBlock.type.text, "に入ってしまった")
+                    }
+                    continue
+                }
             }
 
             val mainHandItem = player.inventory.itemInMainHand.type
@@ -175,16 +198,53 @@ class Game : Listener {
                 }
             }
 
+            // 雨に濡れたら死ぬ
+            val inRain = player.isInRain
+            if (inRain && state.deathColor == EnumColor.BLUE) {
+                player.damage(state.damageAmount) {
+                    player.deathMessage(state.deathColor, Component.text("雨").color(NamedTextColor.BLUE), "に濡れてしまった")
+                }
+                continue
+            }
+
+            // 雪に当たったら死ぬ
+            val inSnow = player.world.hasStorm()
+                    && player.location.block.temperature < 0.15
+                    && player.world.getHighestBlockAt(player.location).y <= player.location.y
+            if (inSnow && state.deathColor == EnumColor.WHITE) {
+                player.damage(state.damageAmount) {
+                    player.deathMessage(state.deathColor, Component.text("雪").color(NamedTextColor.AQUA), "に当たってしまった")
+                }
+                continue
+            }
+
             val nearbyEntity = nearbyEntities.find { it.toEnumColor() == state.deathColor }
             if (nearbyEntity != null) {
                 // 近くに死ぬ色のエンティティがいたら死ぬ
                 player.damage(state.damageAmount) {
                     player.deathMessage(state.deathColor, nearbyEntity.text, "にぶつかってしまった")
                 }
+                continue
             }
         }
+    }
 
-        state.deathColor
+    /** プレイヤーの下のブロックをすべて取得 */
+    private fun Player.getBlocksBelow(): List<Block> {
+        val boundingBox = boundingBox
+        val world = world
+        // プレイヤーの下のブロックの高さ
+        val yBelow = location.y - 0.0001
+        // 隣接する候補のブロックを取得
+        val northEast: Block = Location(world, boundingBox.maxX, yBelow, boundingBox.minZ).block
+        val northWest: Block = Location(world, boundingBox.minX, yBelow, boundingBox.minZ).block
+        val southEast: Block = Location(world, boundingBox.maxX, yBelow, boundingBox.maxZ).block
+        val southWest: Block = Location(world, boundingBox.minX, yBelow, boundingBox.maxZ).block
+        // 重複なし、空気以外のブロックを返す
+        return sequenceOf(northEast, northWest, southEast, southWest)
+            .filterNot { it.type.isAir }
+            .distinct()
+            .toList()
     }
 
     /** ブロックを触ったとき/殴ったとき */

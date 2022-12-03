@@ -9,7 +9,7 @@ commands:
     description: DeathColorコマンド
     permission: deathcolor.command
     usage: |-
-      /deathcolor <on|off>
+      /deathcolor <start|stop>
 
 permissions:
   deathcolor.command:
