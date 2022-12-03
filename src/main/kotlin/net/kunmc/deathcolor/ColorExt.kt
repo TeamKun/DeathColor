@@ -18,19 +18,28 @@ fun Material.toEnumColor(): EnumColor? {
 /** エンティティの色を取得する */
 fun Entity.toEnumColor(): EnumColor? {
     val entity = when (type) {
+        // 額縁は中のアイテムの色を使用
         EntityType.ITEM_FRAME -> {
             this as ItemFrame
             return this.item.type.toEnumColor()
         }
 
+        // 落下中のブロックはブロックの色を使用
         EntityType.FALLING_BLOCK -> {
             this as FallingBlock
             return this.blockData.material.toEnumColor()
         }
 
+        // ドロップアイテムはアイテムの色を使用
         EntityType.DROPPED_ITEM -> {
             this as Item
             return this.itemStack.type.toEnumColor()
+        }
+
+        // ヒツジは毛の色を使用
+        EntityType.SHEEP -> {
+            this as Sheep
+            return EnumColor.values().find { it.name == color?.name }
         }
 
         else -> type
