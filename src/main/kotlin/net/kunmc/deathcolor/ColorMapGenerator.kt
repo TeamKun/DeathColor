@@ -96,7 +96,7 @@ object ColorMapGenerator {
 
         // エンティティのテクスチャを取得
         val map = EntityType.values()
-            .filter { it != EntityType.UNKNOWN && it.isAlive }
+            .filter { it != EntityType.UNKNOWN }
             .associate { entityType ->
                 // エンティティのバニラID
                 val key = convertEntityToColor(entityType.key.key)
