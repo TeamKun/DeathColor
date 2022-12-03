@@ -1,6 +1,11 @@
 game:
+  # 開始前の待機時間
   cooldownTime: 5
+  # 終了後の休憩時間の秒数
   intervalTime: 15
+  # 死の色に触ったときのダメージ量
+  damage: 100.0
+  # プレイ中の残り時間の候補
   remainingTimeCandidates:
     - 60
     - 180

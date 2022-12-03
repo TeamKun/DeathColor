@@ -37,10 +37,11 @@ class GameState(private val bossBar: BossBar) {
     }
 
     /** 現在のフェーズ */
-    private var phase = Phase.COOLDOWN
+    var phase = Phase.COOLDOWN
 
     /** 死ぬ色 */
-    private var deathColor: EnumColor = EnumColor.WHITE
+    var deathColor: EnumColor = EnumColor.WHITE
+        private set
 
 
     /** ランダムな色にセットする */
@@ -95,9 +96,9 @@ class GameState(private val bossBar: BossBar) {
                 90,
                 0
             )
-            it.sendMessage("$CHAT_PREFIX 次の触れたら死ぬ色は「 ${deathColor.chatColor}${ChatColor.BOLD}${deathColor.langName}${ChatColor.WHITE} 」です")
-            it.sendMessage("$CHAT_PREFIX  ${ChatColor.ITALIC}${getMinuteSecondString(timeCooldown)}後 に開始します")
         }
+        Bukkit.broadcastMessage("$CHAT_PREFIX 次の触れたら死ぬ色は「 ${deathColor.chatColor}${ChatColor.BOLD}${deathColor.langName}${ChatColor.WHITE} 」です")
+        Bukkit.broadcastMessage("$CHAT_PREFIX  ${ChatColor.ITALIC}${getMinuteSecondString(timeCooldown)}後 に開始します")
     }
 
     /** カウントダウンタイトルを表示 */
@@ -123,16 +124,16 @@ class GameState(private val bossBar: BossBar) {
                 40,
                 10
             )
-            it.sendMessage("$CHAT_PREFIX スタート")
-            it.sendMessage("$CHAT_PREFIX  触れたら死ぬ色は「 ${deathColor.chatColor}${ChatColor.BOLD}${deathColor.langName}${ChatColor.WHITE} 」です")
-            it.sendMessage(
-                "$CHAT_PREFIX  制限時間は ${ChatColor.YELLOW}${ChatColor.ITALIC}${
-                    getMinuteSecondString(
-                        timeGameRemaining
-                    )
-                }${ChatColor.RESET} です"
-            )
         }
+        Bukkit.broadcastMessage("$CHAT_PREFIX スタート")
+        Bukkit.broadcastMessage("$CHAT_PREFIX  触れたら死ぬ色は「 ${deathColor.chatColor}${ChatColor.BOLD}${deathColor.langName}${ChatColor.WHITE} 」です")
+        Bukkit.broadcastMessage(
+            "$CHAT_PREFIX  制限時間は ${ChatColor.YELLOW}${ChatColor.ITALIC}${
+                getMinuteSecondString(
+                    timeGameRemaining
+                )
+            }${ChatColor.RESET} です"
+        )
     }
 
     /** 分,秒の文字列を返す */

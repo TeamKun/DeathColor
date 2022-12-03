@@ -220,14 +220,17 @@ object ColorMapGenerator {
 
                 // 配置するブロックの座標
                 val blockAt = world.getBlockAt((index % 16) * 3, height, 10 + (index / 16) * 5)
-                world.spawnEntity(blockAt.location, entityType).apply {
-                    setGravity(false)
-                    if (this is LivingEntity) {
-                        setAI(false)
-                        isInvulnerable = true
-                        isPersistent = true
+                runCatching {
+                    world.spawnEntity(blockAt.location, entityType).apply {
+                        setGravity(false)
+                        if (this is LivingEntity) {
+                            setAI(false)
+                            isInvulnerable = true
+                            isPersistent = true
+                        }
                     }
                 }
+
                 // 床を色付きの羊毛にする
                 if (color != null) {
                     for (ix in -1..1) {
@@ -235,6 +238,18 @@ object ColorMapGenerator {
                             blockAt.getRelative(ix, -1, iz).setType(color.wool, false)
                         }
                     }
+                }
+
+                // 看板にブロックIDを書いて配置
+                blockAt.getRelative(0, 0, -1).apply {
+                    setType(Material.OAK_SIGN, false)
+                    val blockState = state as Sign
+                    entityType.name.chunked(15).forEachIndexed { i, name ->
+                        if (i < 4) {
+                            blockState.line(i, Component.text(name))
+                        }
+                    }
+                    blockState.update()
                 }
             }
     }

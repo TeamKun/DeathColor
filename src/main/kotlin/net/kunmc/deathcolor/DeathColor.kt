@@ -29,11 +29,13 @@ class DeathColor : JavaPlugin() {
         // ゲーム進行
         game = Game()
         server.pluginManager.registerEvents(game, this)
-        server.scheduler.runTaskTimer(this, game::tick, 0, 20)
+        server.scheduler.runTaskTimer(this, game::tickState, 0, 20)
+        server.scheduler.runTaskTimer(this, game::tickMove, 0, 5)
     }
 
     override fun onDisable() {
         // Plugin shutdown logic
+        game.stop()
     }
 
     /** コンフィグファイルを読み込む、なければresourcesからコピーする */
@@ -46,7 +48,12 @@ class DeathColor : JavaPlugin() {
     }
 
     /** コマンド TAB補完 */
-    override fun onTabComplete(sender: CommandSender, command: Command, alias: String, args: Array<out String>): MutableList<String> {
+    override fun onTabComplete(
+        sender: CommandSender,
+        command: Command,
+        alias: String,
+        args: Array<out String>
+    ): MutableList<String> {
         return when (args.size) {
             1 -> mutableListOf("start", "stop")
             else -> mutableListOf()
