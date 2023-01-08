@@ -10,5 +10,5 @@ game:
   # プレイ中の残り時間の候補
   remainingTimeCandidates:
     - 60
+    - 120
     - 180
-    - 300
